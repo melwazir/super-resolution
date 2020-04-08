@@ -26,7 +26,7 @@ def res_block(x_in, num_filters, momentum=0.8):
     return x
 
 
-def sr_resnet(num_filters=64, num_res_blocks=16):
+def sr_resnet(scale, num_filters=64, num_res_blocks=16):
     x_in = Input(shape=(None, None, 3))
     x = Lambda(normalize_01)(x_in)
 
@@ -41,7 +41,10 @@ def sr_resnet(num_filters=64, num_res_blocks=16):
     x = Add()([x_1, x])
 
     x = upsample(x, num_filters * 4)
-    x = upsample(x, num_filters * 4)
+    if(scale>2):
+        x = upsample(x, num_filters * 4)
+    if(scale>4):
+        x = upsample(x, num_filters * 4)
 
     x = Conv2D(3, kernel_size=9, padding='same', activation='tanh')(x)
     x = Lambda(denormalize_m11)(x)
@@ -49,7 +52,9 @@ def sr_resnet(num_filters=64, num_res_blocks=16):
     return Model(x_in, x)
 
 
-generator = sr_resnet
+def generator(scale):
+    print(scale)
+    return sr_resnet(scale)
 
 
 def discriminator_block(x_in, num_filters, strides=1, batchnorm=True, momentum=0.8):
