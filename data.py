@@ -18,6 +18,7 @@ class DIV2K:
         self.images_dir = images_dir
         self.caches_dir = caches_dir
         self.subset = subset
+        self.downgrade=downgrade
         if scale in _scales:
             self.scale = scale
         else:
