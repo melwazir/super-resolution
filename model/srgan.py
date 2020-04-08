@@ -53,7 +53,6 @@ def sr_resnet(scale, num_filters=64, num_res_blocks=16):
 
 
 def generator(scale):
-    print(scale)
     return sr_resnet(scale)
 
 
