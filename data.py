@@ -8,26 +8,32 @@ class DIV2K:
     def __init__(self,
                  scale=2,
                  subset='train',
+                 split=0.95,
+                 length=None,
                  downgrade='bicubic',
-                 images_dir='.div2k/images',
-                 caches_dir='.div2k/caches'):
+                 images_dir='div2k/images',
+                 caches_dir='div2k/caches'):
 
         self._ntire_2018 = True
-
         _scales = [2, 3, 4, 8]
-
+        self.images_dir = images_dir
+        self.caches_dir = caches_dir
+        self.subset = subset
         if scale in _scales:
             self.scale = scale
         else:
             raise ValueError(f'scale must be in ${_scales}')
-
+        assert(os.path.exists(self._hr_images_dir()))
+        image_ids=os.listdir(self._hr_images_dir())
+        if (length is None):
+            length=len(image_ids)
+        ind=int(split*length)
         if subset == 'train':
-            self.image_ids = range(1, 801)
+            self.image_ids = image_ids[0: ind+1]
         elif subset == 'valid':
-            self.image_ids = range(801, 901)
+            self.image_ids = image_ids[ind+1: length-1]
         else:
             raise ValueError("subset must be 'train' or 'valid'")
-
         _downgrades_a = ['bicubic', 'unknown']
         _downgrades_b = ['mild', 'difficult']
 
@@ -45,13 +51,9 @@ class DIV2K:
             self.downgrade = downgrade
             self._ntire_2018 = False
 
-        self.subset = subset
-        self.images_dir = images_dir
-        self.caches_dir = caches_dir
-
         os.makedirs(images_dir, exist_ok=True)
         os.makedirs(caches_dir, exist_ok=True)
-
+        
     def __len__(self):
         return len(self.image_ids)
 
@@ -68,6 +70,7 @@ class DIV2K:
 
     def hr_dataset(self):
         if not os.path.exists(self._hr_images_dir()):
+            print("No HR")
             download_archive(self._hr_images_archive(), self.images_dir, extract=True)
 
         ds = self._images_dataset(self._hr_image_files()).cache(self._hr_cache_file())
@@ -79,6 +82,7 @@ class DIV2K:
 
     def lr_dataset(self):
         if not os.path.exists(self._lr_images_dir()):
+            print("No LR")
             download_archive(self._lr_images_archive(), self.images_dir, extract=True)
 
         ds = self._images_dataset(self._lr_image_files()).cache(self._lr_cache_file())
@@ -102,26 +106,25 @@ class DIV2K:
 
     def _hr_image_files(self):
         images_dir = self._hr_images_dir()
-        return [os.path.join(images_dir, f'{image_id:04}.png') for image_id in self.image_ids]
+        print(self.subset,[os.path.join(images_dir, image_id) for image_id in self.image_ids])
+        return ([os.path.join(images_dir, image_id) for image_id in self.image_ids])
 
     def _lr_image_files(self):
         images_dir = self._lr_images_dir()
-        return [os.path.join(images_dir, self._lr_image_file(image_id)) for image_id in self.image_ids]
+        print(self.subset,[os.path.join(images_dir, image_id) for image_id in self.image_ids])
+        return ([os.path.join(images_dir, image_id) for image_id in self.image_ids])
 
     def _lr_image_file(self, image_id):
-        if not self._ntire_2018 or self.scale == 8:
-            return f'{image_id:04}x{self.scale}.png'
-        else:
-            return f'{image_id:04}x{self.scale}{self.downgrade[0]}.png'
+        return image_id
 
     def _hr_images_dir(self):
-        return os.path.join(self.images_dir, f'DIV2K_{self.subset}_HR')
+        return os.path.join(self.images_dir, f'DIV2K_train_HR')
 
     def _lr_images_dir(self):
         if self._ntire_2018:
-            return os.path.join(self.images_dir, f'DIV2K_{self.subset}_LR_{self.downgrade}')
+            return os.path.join(self.images_dir, f'DIV2K_train_LR_{self.downgrade}')
         else:
-            return os.path.join(self.images_dir, f'DIV2K_{self.subset}_LR_{self.downgrade}', f'X{self.scale}')
+            return os.path.join(self.images_dir, f'DIV2K_train_LR_{self.downgrade}', f'X{self.scale}')
 
     def _hr_images_archive(self):
         return f'DIV2K_{self.subset}_HR.zip'
