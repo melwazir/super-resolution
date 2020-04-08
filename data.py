@@ -14,7 +14,6 @@ class DIV2K:
                  images_dir='div2k/images',
                  caches_dir='div2k/caches'):
 
-        self._ntire_2018 = True
         _scales = [2, 3, 4, 8]
         self.images_dir = images_dir
         self.caches_dir = caches_dir
@@ -53,22 +52,15 @@ class DIV2K:
         return ds
 
     def hr_dataset(self):
-        if not os.path.exists(self._hr_images_dir()):
-            print("No HR")
-            download_archive(self._hr_images_archive(), self.images_dir, extract=True)
-
+        assert(os.path.exists(self._hr_images_dir())):
         ds = self._images_dataset(self._hr_image_files()).cache(self._hr_cache_file())
-
         if not os.path.exists(self._hr_cache_index()):
             self._populate_cache(ds, self._hr_cache_file())
 
         return ds
 
     def lr_dataset(self):
-        if not os.path.exists(self._lr_images_dir()):
-            print("No LR")
-            download_archive(self._lr_images_archive(), self.images_dir, extract=True)
-
+        assert(os.path.exists(self._lr_images_dir())):
         ds = self._images_dataset(self._lr_image_files()).cache(self._lr_cache_file())
 
         if not os.path.exists(self._lr_cache_index()):
@@ -106,15 +98,6 @@ class DIV2K:
 
     def _lr_images_dir(self):
         return os.path.join(self.images_dir, f'DIV2K_train_LR_{self.downgrade}', f'X{self.scale}')
-
-    def _hr_images_archive(self):
-        return f'DIV2K_{self.subset}_HR.zip'
-
-    def _lr_images_archive(self):
-        if self._ntire_2018:
-            return f'DIV2K_{self.subset}_LR_{self.downgrade}.zip'
-        else:
-            return f'DIV2K_{self.subset}_LR_{self.downgrade}_X{self.scale}.zip'
 
     @staticmethod
     def _images_dataset(image_files):
@@ -162,15 +145,3 @@ def random_flip(lr_img, hr_img):
 def random_rotate(lr_img, hr_img):
     rn = tf.random.uniform(shape=(), maxval=4, dtype=tf.int32)
     return tf.image.rot90(lr_img, rn), tf.image.rot90(hr_img, rn)
-
-
-# -----------------------------------------------------------
-#  IO
-# -----------------------------------------------------------
-
-
-def download_archive(file, target_dir, extract=True):
-    source_url = f'http://data.vision.ee.ethz.ch/cvl/DIV2K/{file}'
-    target_dir = os.path.abspath(target_dir)
-    tf.keras.utils.get_file(file, source_url, cache_subdir=target_dir, extract=extract)
-    os.remove(os.path.join(target_dir, file))
