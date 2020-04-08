@@ -1,11 +1,13 @@
-from tensorflow.python.keras.layers import Add, BatchNormalization, Conv2D, Dense, Flatten, Input, LeakyReLU, PReLU, Lambda
+from tensorflow.python.keras.layers import Add, BatchNormalization, Conv2D, Dense, Flatten, Input, LeakyReLU, PReLU, Lambda, GlobalAveragePooling2D
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.applications.vgg19 import VGG19
 
 from model.common import pixel_shuffle, normalize_01, normalize_m11, denormalize_m11
 
 LR_SIZE = 24
-HR_SIZE = 96
+#HR_SIZE = 96
+HR_SIZE = None
+
 
 
 def upsample(x_in, num_filters):
@@ -73,7 +75,7 @@ def discriminator(num_filters=64):
     x = discriminator_block(x, num_filters * 8)
     x = discriminator_block(x, num_filters * 8, strides=2)
 
-    x = Flatten()(x)
+    x = GlobalAveragePooling2D()(x)
 
     x = Dense(1024)(x)
     x = LeakyReLU(alpha=0.2)(x)
