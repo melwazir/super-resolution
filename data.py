@@ -34,22 +34,6 @@ class DIV2K:
             self.image_ids = image_ids[ind+1: length-1]
         else:
             raise ValueError("subset must be 'train' or 'valid'")
-        _downgrades_a = ['bicubic', 'unknown']
-        _downgrades_b = ['mild', 'difficult']
-
-        if scale == 8 and downgrade != 'bicubic':
-            raise ValueError(f'scale 8 only allowed for bicubic downgrade')
-
-        if downgrade in _downgrades_b and scale != 4:
-            raise ValueError(f'{downgrade} downgrade requires scale 4')
-
-        if downgrade == 'bicubic' and scale == 8:
-            self.downgrade = 'x8'
-        elif downgrade in _downgrades_b:
-            self.downgrade = downgrade
-        else:
-            self.downgrade = downgrade
-            self._ntire_2018 = False
 
         os.makedirs(images_dir, exist_ok=True)
         os.makedirs(caches_dir, exist_ok=True)
@@ -121,10 +105,7 @@ class DIV2K:
         return os.path.join(self.images_dir, f'DIV2K_train_HR')
 
     def _lr_images_dir(self):
-        if self._ntire_2018:
-            return os.path.join(self.images_dir, f'DIV2K_train_LR_{self.downgrade}')
-        else:
-            return os.path.join(self.images_dir, f'DIV2K_train_LR_{self.downgrade}', f'X{self.scale}')
+        return os.path.join(self.images_dir, f'DIV2K_train_LR_{self.downgrade}', f'X{self.scale}')
 
     def _hr_images_archive(self):
         return f'DIV2K_{self.subset}_HR.zip'
