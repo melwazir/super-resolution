@@ -52,7 +52,7 @@ class DIV2K:
         return ds
 
     def hr_dataset(self):
-        assert(os.path.exists(self._hr_images_dir())):
+        assert(os.path.exists(self._hr_images_dir()))
         ds = self._images_dataset(self._hr_image_files()).cache(self._hr_cache_file())
         if not os.path.exists(self._hr_cache_index()):
             self._populate_cache(ds, self._hr_cache_file())
@@ -60,7 +60,7 @@ class DIV2K:
         return ds
 
     def lr_dataset(self):
-        assert(os.path.exists(self._lr_images_dir())):
+        assert(os.path.exists(self._lr_images_dir()))
         ds = self._images_dataset(self._lr_image_files()).cache(self._lr_cache_file())
 
         if not os.path.exists(self._lr_cache_index()):
