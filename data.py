@@ -83,12 +83,10 @@ class DIV2K:
 
     def _hr_image_files(self):
         images_dir = self._hr_images_dir()
-        print(self.subset,[os.path.join(images_dir, image_id) for image_id in self.image_ids])
         return ([os.path.join(images_dir, image_id) for image_id in self.image_ids])
 
     def _lr_image_files(self):
         images_dir = self._lr_images_dir()
-        print(self.subset,[os.path.join(images_dir, image_id) for image_id in self.image_ids])
         return ([os.path.join(images_dir, image_id) for image_id in self.image_ids])
 
     def _lr_image_file(self, image_id):
