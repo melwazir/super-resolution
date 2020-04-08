@@ -5,7 +5,7 @@ from PIL import Image
 
 
 def load_image(path):
-    return np.array(Image.open(path))
+    return np.array(Image.open(path).convert('RGB'))
 
 
 def plot_sample(lr, sr):
