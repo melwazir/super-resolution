@@ -1,4 +1,4 @@
-from tensorflow.python.keras.layers import Add, BatchNormalization, Conv2D, Dense, Flatten, Input, LeakyReLU, PReLU, Lambda, GlobalAveragePooling2D
+from tensorflow.python.keras.layers import Add, BatchNormalization, Conv2D, Dense, Flatten, Input, LeakyReLU, PReLU, Lambda, GlobalMaxPooling2D
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.applications.vgg19 import VGG19
 
@@ -79,7 +79,7 @@ def discriminator(num_filters=64):
     x = discriminator_block(x, num_filters * 8)
     x = discriminator_block(x, num_filters * 8, strides=2)
 
-    x = GlobalAveragePooling2D()(x)
+    x = GlobalMaxPooling2D()(x)
 
     x = Dense(1024)(x)
     x = LeakyReLU(alpha=0.2)(x)
